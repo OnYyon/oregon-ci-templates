@@ -20,24 +20,24 @@ on:
         default: true
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-    - name: Setup go
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ inputs.go-version }}
-        cache: true
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ inputs.go-version }}
+          cache: true
 
-    - name: Run golangci-lint
-      id: lint-step
-      continue-on-error: ${{ !inputs.fail-on-error }}
-      uses: golangci/golangci-lint-action@v6
-      with:
-      working-directory: ${{ inputs.working-directory }}
-      args: --timeout=5m
-      verbose: true
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run golangci-lint
+        id: lint-step
+        continue-on-error: ${{ !inputs.fail-on-error }}
+        uses: golangci/golangci-lint-action@v6
+        with:
+          working-directory: ${{ inputs.working-directory }}
+          args: --timeout=5m
+          verbose: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
