@@ -22,7 +22,7 @@ on:
         description: "Path to code"
         required: false
         type: string
-        default: "./src"
+        default: ""
       coverage-threshold:
         description: "Minimal coverage %"
         required: false
@@ -43,7 +43,7 @@ jobs:
           python-version: ${{ inputs.python-version }}
 
       - name: Install dependencies
-        run: uv sync --frozen
+        run: uv sync --frozen --dev
 
       - name: Run Ruff linter
         uses: astral-sh/ruff-action@v3
