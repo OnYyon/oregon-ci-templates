@@ -1,0 +1,85 @@
+name: Lint and run test python
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version"
+        required: false
+        type: string
+        default: "3.14"
+      test-command:
+        description: "Command to run tests"
+        required: false
+        type: string
+        default: "pytest"
+      test-path:
+        description: "Path to tests"
+        required: false
+        type: string
+        default: "./tests"
+      ty-sources:
+        description: "Path to code"
+        required: false
+        type: string
+        default: "./src"
+      coverage-threshold:
+        description: "Minimal coverage %"
+        required: false
+        type: number
+        default: 80
+
+jobs:
+  lint-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run Ruff linter
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: "latest"
+          args: check . --output-format=github
+
+      - name: Run Ruff formatter
+        uses: astral-sh/ruff-action@v3
+        with:
+          version: "latest"
+          args: format . --check
+
+      - name: Run Ty type checking
+        run: |
+          uv run ty check ${{ inputs.ty-sources }} \
+            --output-format=github
+
+      - name: Run tests with coverage
+        run: |
+          uv run ${{ inputs.test-command }} ${{ inputs.test-path }} \
+            --cov=. \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term-missing
+
+      - name: Check coverage threshold
+        run: coverage report --fail-under=${{ inputs.coverage-threshold }}
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-report-py${{ inputs.python-version }}-${{ github.run_id }}
+          path: |
+            htmlcov/
+            coverage.xml
+          retention-days: 7
+          if-no-files-found: warn

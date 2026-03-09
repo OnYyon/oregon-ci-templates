@@ -49,7 +49,7 @@ jobs:
           go test -v $RACE_FLAG -coverprofile=coverage.out -covermode=atomic ${{ inputs.test-packages }}
           go tool cover -html=coverage.out -o coverage.html
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-report-${{ github.run_id }}
@@ -57,4 +57,4 @@ jobs:
             coverage.html
             coverage.out
           retention-days: 5
-        if-no-files-found: warn
+          if-no-files-found: warn
